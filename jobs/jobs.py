@@ -4,7 +4,7 @@ import assets.economist_assets as economist_assets
 
 
 generate_report_job = define_asset_job(
-    "generate report",
+    "generate_report",
     selection=AssetSelection.assets(
         economist_assets.scrape_ssb_data,
         economist_assets.interpret_ssb_data,

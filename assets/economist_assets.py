@@ -23,7 +23,8 @@ def scrape_ssb_data(context: AssetExecutionContext,
     Scrape data from SSB,transform and write it to DuckDB.
     """
     SSB_URL = 'https://data.ssb.no/api/v0/no/table/08651/'
-    with open("queries/build_index.json", "r", encoding="utf-8") as f:
+    query_path = Path(__file__).parent / "queries" / "build_index.json"
+    with open(query_path, "r", encoding="utf-8") as f:
         payload = json.load(f)
     # Make POST request to SSB API
     response = requests.post(SSB_URL, json=payload)
@@ -31,18 +32,19 @@ def scrape_ssb_data(context: AssetExecutionContext,
     if response.status_code == 200:
         dataset = pyjstat.Dataset.read(response.text)
         df = dataset.write('dataframe')
-        Logg.info(f"Retrieved {df.shape[0]} rows of data")
+        Logg.info(context,f"Retrieved {df.shape[0]} rows of data")
     else:
-        Logg.info(f"Request failed with status code {response.status_code}")
+        Logg.info(context,f"Request failed with status code {response.status_code}")
 
     df = transform_build_index(df)
-    plot_base64 = plot_cost_index(df, "../cost_index.png")
+    output_path = Path(__file__).parent.parent / "cost_index.png"
+    plot_base64 = plot_cost_index(df, output_path)
     # Write data to duckdb
     with duckdb.get_connection() as conn:
             conn.execute("""
                     INSERT INTO build_index (input_factor, month, cost_index, delta_month_pct, delta_year_pct)
                     SELECT input_factor, month, cost_index, delta_month_pct, delta_year_pct
-                    FROM build_index_df
+                    FROM df
                          """)
             Logg.info(context, "Data written to DuckDB table 'build_index'.")
             conn.close()
@@ -124,8 +126,8 @@ def interpret_ssb_data(context: AssetExecutionContext,
 
     Logg.info(context, f"Insert first report into report_template")
     # Insert initial report into the template
-    template_path = Path("../report_template.md")
-    output_path = Path("../report1.md")
+    template_path = Path(__file__).parent.parent / "report_template.md"
+    output_path = Path(__file__).parent.parent / "report1.md"
 
     with open(template_path, "r", encoding="utf-8") as f:
         template = f.read()
@@ -194,7 +196,7 @@ def finish_report(context: AssetExecutionContext,
     """
     Finalize the report by correcting for input from latest PPR.
     """
-    data_path = Path("../data")
+    data_path = Path(__file__).resolve().parent.parent / "data"
     ppr_summary_path = data_path / "ppr_summary.txt"
     first_report_path = data_path / "first_report.txt"  
     with open(ppr_summary_path, "r", encoding="utf-8") as f:
@@ -243,8 +245,9 @@ def finish_report(context: AssetExecutionContext,
     final_report_path = data_path / "final_report.txt"
     with open(final_report_path, "w", encoding="utf-8") as f:
         f.write(final_report)
-    template_path = Path("../report1.md")
-    output_path = Path("../report_final.md")
+    repo_root = Path(__file__).resolve().parent.parent
+    template_path = repo_root / "report1.md"
+    output_path = repo_root / "report_final.md"
 
     with open(template_path, "r", encoding="utf-8") as f:
         template = f.read()
