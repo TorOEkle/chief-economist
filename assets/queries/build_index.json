@@ -1,0 +1,26 @@
+{
+  "query": [
+    {
+      "code": "Arbeidstype",
+      "selection": {
+        "filter": "item",
+        "values": [
+          "02",
+          "03"
+        ]
+      }
+    },
+    {
+      "code": "Tid",
+      "selection": {
+        "filter": "all",
+        "values": [
+          "*"
+        ]
+      }
+    }
+  ],
+  "response": {
+    "format": "json-stat2"
+  }
+}

@@ -1,0 +1,107 @@
+# 🧹 Kodstil & Lintning med Ruff
+
+Det här projektet använder [Ruff](https://docs.astral.sh/ruff/) för att automatiskt hålla vår Python-kod snygg, konsekvent och felfri. Vi använder även [Black](https://black.readthedocs.io/) för automatisk kodformatering.
+
+## 📦 Installation
+
+### 1. Installera Ruff, Black och pre-commit
+
+Installera [Ruff](https://docs.astral.sh/ruff/), [Black](https://black.readthedocs.io/) och [pre-commit](https://pre-commit.com) med pip (gärna i en virtuell miljö):
+
+```bash
+pip install ruff black pre-commit
+```
+
+### 2. Skapa `.pre-commit-config.yaml` i projektets rotmapp
+
+Lägg till följande innehåll i `.pre-commit-config.yaml` för att använda både Ruff och Black:
+
+```yaml
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.11.11  # Använd samma version som din Ruff-installation
+    hooks:
+      - id: ruff
+        args: [--fix, --select=I]
+        types_or: [python, pyi, jupyter]
+  - repo: https://github.com/psf/black
+    rev: 25.1.0  # Kontrollera senaste versionen
+    hooks:
+      - id: black
+```
+
+### 4. Skapa  `pyproject.toml` i projektets rotmapp
+
+Ruff konfigureras via filen `pyproject.toml`. Vi använder följande inställningar:
+
+```toml
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+force-sort-within-sections = true
+lines-after-imports = 2
+order-by-type = false
+case-sensitive = false
+force-wrap-aliases = true
+split-on-trailing-comma = true
+relative-imports-order = "closest-to-furthest"
+known-first-party = ["assets", "functions", "resources"]
+
+[tool.black]
+line-length = 120
+```
+#### Ruff linter beskrivning
+* `E`: kodstil enligt PEP8
+* `F`: felkontroller med Pyflakes
+* `I`: importsortering enligt isort
+
+---
+
+## 🚀 Användning
+
+Nu kommer Ruff och Black att köras automatiskt varje gång du kör:
+
+```bash
+git commit -m "Min commit"
+```
+
+Om Ruff eller Black hittar något fel kommer commiten att stoppas tills du åtgärdar det – eller så fixas det direkt automatiskt.
+
+
+### Manuellt: kontrollera och fixa kod
+
+```bash
+ruff check .             # Visa problem
+ruff check . --fix       # Fixa problem automatiskt
+```
+
+### Kontrollera en specifik fil
+
+```bash
+ruff check src/my_file.py --fix
+```
+
+---
+
+## 📖 Beskrivningar av verktyg
+
+### Git pre-commit hooks (automatisering) - Vad är det?
+
+En **Git pre-commit hook** körs **innan du gör en commit**, för att se till att du inte committar kod som bryter mot projektets kodstandard.
+
+### Varför använder vi det?
+
+* Alla i teamet får samma kodstil – utan att behöva tänka på det
+* Inget glöms – Ruff körs automatiskt varje gång
+* Renare och mer professionella commits
+
+## 💡 Tips
+
+* Använd ett kodformat med stöd för Ruff och Black (t.ex. VS Code med Ruff och Black plugin)
+* Lägg till `ruff check .` i din CI/CD pipeline
+* Använd `--fix` för att slippa manuellt pilla med importordning
