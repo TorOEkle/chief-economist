@@ -12,6 +12,7 @@ echo "Python dependencies installed."
 cd data
 
 # Run schema.sql into the DuckDB database
+rm economist.duckdb
 duckdb economist.duckdb < schema.sql
 
 echo "Setup complete. The DuckDB database has been initialized with the schema."
